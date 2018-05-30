@@ -7,20 +7,6 @@ Contains
 
 !================================================================================================ 
 
-SUBROUTINE ddxyz(var1,dvar1,var2,dvar2,var3,dvar3,bcx,bcy,bcz)
-
-real(dp), INTENT(IN), dimension(dim1(rank),dim2(rank),dim3(rank)) :: var1,var2,var3
-real(dp), INTENT(OUT), dimension(dim1(rank),dim2(rank),dim3(rank)) :: dvar1,dvar2,dvar3
-integer :: bcx,bcy,bcz
-
-call ddx(var1,dvar1,bcx)
-call ddy(var2,dvar2,bcy)
-call ddz(var3,dvar3,bcz)
-
-END SUBROUTINE ddxyz
-
-!================================================================================================ 
-
 SUBROUTINE ddx(input,output, bc)
 
   integer ii,jj,kk,ii2,bc

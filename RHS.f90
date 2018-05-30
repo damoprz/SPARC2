@@ -39,10 +39,13 @@ subroutine MP_QUIET_3D
 
 ! CALL THE OVERLAP-DERIVATIVE ROUTINE
 
-  call ddxyz(v_x, dvxdx, v_y, dvydy, v_z, dvzdz,bh_vel,bh_vel,bv_vel)
-  call ddxyz(p, gradp_x, p, gradp_y, p, gradp_z,bh_prerho,bh_prerho,bv_prerho)
+  call ddx(v_x, dvxdx, bh_vel)
+  call ddy(v_y, dvydy, bh_vel)
+  call ddz(v_z, dvzdz, bv_vel)
 
-! NOTE THAT flux3 is overwritten in the final ddxyz call
+  call ddx(p, gradp_x, bh_prerho)
+  call ddy(p, gradp_y, bh_prerho)
+  call ddz(p, gradp_z, bv_prerho)
 
   if (USE_PML) then
     if (IAM_ZBOT) then
@@ -194,7 +197,9 @@ subroutine MP_QUIET_DISPL_3D
  bv_disp = 1
  bv_prerho = 1
 
- call ddxyz(xi_x, dxixdx, xi_y, dxiydy, xi_z, dxizdz, bh_disp,bh_disp,bv_disp)
+ call ddx(xi_x, dxixdx, bh_disp)
+ call ddy(xi_y, dxiydy, bh_disp)
+ call ddz(xi_z, dxizdz, bv_disp)
 
 
   if (USE_PML) then
@@ -238,7 +243,9 @@ dxiydy(:,dim2(rank)-nypmltop+1:dim2(rank),:)/kappay + psiyvy
  p = - c2rho0 * div - xi_z * gradp0_z
  rho = - rho0 * div - xi_z * gradrho0_z
 
- call ddxyz(p, gradp_x, p, gradp_y, p, gradp_z, bh_prerho,bh_prerho,bv_prerho)
+ call ddx(p, gradp_x, bh_prerho)
+ call ddy(p, gradp_y, bh_prerho)
+ call ddz(p, gradp_z, bv_prerho)
 
   if (USE_PML) then
     if (IAM_ZBOT) then
@@ -285,15 +292,21 @@ if (FLOWS) then
   allocate(temp_x(dim1(rank),dim2(rank),dim3(rank)),temp_y(dim1(rank),dim2(rank),dim3(rank)),&
    temp_z(dim1(rank),dim2(rank),dim3(rank)))
 
-   call ddxyz(v_x, temp_x, v_x, temp_y, v_x, temp_z, bh_disp,bh_disp,bv_disp)
+   call ddx(v_x, temp_x, bh_disp)
+   call ddy(v_x, temp_y, bh_disp)
+   call ddz(v_x, temp_z, bv_disp)
 
    RHSv_x = RHSv_x- 2.0_dp * (v0_x * temp_x + v0_y * temp_y + v0_z * temp_z)
-
-   call ddxyz(v_y, temp_x, v_y, temp_y, v_y, temp_z, bh_disp,bh_disp,bv_disp)
+   
+   call ddx(v_y, temp_x, bh_disp)
+   call ddy(v_y, temp_y, bh_disp)
+   call ddz(v_y, temp_z, bv_disp)
 
    RHSv_y = RHSv_y- 2.0_dp * (v0_x * temp_x + v0_y * temp_y + v0_z * temp_z)
 
-   call ddxyz(v_z, temp_x, v_z, temp_y, v_z, temp_z, bh_disp,bh_disp,bv_disp)
+   call ddx(v_z, temp_x, bh_disp)
+   call ddy(v_z, temp_y, bh_disp)
+   call ddz(v_z, temp_z, bv_disp)
 
    RHSv_z = RHSv_z- 2.0_dp * (v0_x * temp_x + v0_y * temp_y + v0_z * temp_z)
 
@@ -384,12 +397,29 @@ endif
 
  ! CALLING OVERLAP DERIVATIVE ROUTINE
 
- call ddxyz(v_x, dvxdx, v_y, dvydy, v_z, dvzdz,bh_vel,bh_vel,bv_vel)
- call ddxyz(flux3, dxflux3, p, gradp_y, flux1, dzflux1,bh_mag,bh_prerho,bv_mag)
- call ddxyz(p, gradp_x, flux3, dyflux3, flux2, dzflux2,bh_prerho,bh_mag,bv_mag)
- call ddxyz(flux2, dxflux2, bz, dybz,bx, dzbx,bh_mag,bh_mag,bv_mag)
- call ddxyz(by, dxby, bx, dybx, p, gradp_z,bh_mag,bh_mag,bv_prerho)
- call ddxyz(bz, dxbz, flux1, dyflux1, by, dzby,bh_mag,bh_mag,bv_mag)
+ call ddx(v_x, dvxdx, bh_vel)
+ call ddy(v_y, dvydy, bh_vel)
+ call ddz(v_z, dvzdz, bv_vel)
+
+ call ddx(flux3, dxflux3, bh_mag)
+ call ddy(p, gradp_y, bh_prerho)
+ call ddz(flux1, dzflux1, bv_mag)
+
+ call ddx(p, gradp_x, bh_prerho)
+ call ddy(flux3, dyflux3, bh_mag)
+ call ddz(flux2, dzflux2, bv_mag)
+
+ call ddx(flux2, dxflux2, bh_mag)
+ call ddy(bz, dybz, bh_mag)
+ call ddz(bx, dzbx, bv_mag)
+
+ call ddx(by, dxby, bh_mag)
+ call ddy(bx, dybx, bh_mag)
+ call ddz(p, gradp_z, bv_prerho)
+
+ call ddx(bz, dxbz, bh_mag)
+ call ddy(flux1, dyflux1, bh_mag)
+ call ddz(by, dzby, bv_mag)
 
   if (USE_PML) then
     if (IAM_ZBOT) then
@@ -671,7 +701,9 @@ subroutine MP_MHD_DISPL_3D
  flux2 = - (xi_x * boz - xi_z * box)
  flux3 = - (xi_y * box - xi_x * boy)
 
- call ddxyz(xi_x, dxixdx, xi_y, dxiydy, xi_z, dxizdz, bh_disp,bh_disp,bv_disp)
+ call ddx(xi_x,dxixdx,bh_disp)
+ call ddy(xi_y,dxiydy,bh_disp)
+ call ddz(xi_y,dxizdz,bv_disp)
 
   if (USE_PML) then
     if (IAM_ZBOT) then
@@ -710,7 +742,9 @@ dxiydy(:,dim2(rank)-nypmltop+1:dim2(rank),:)/kappay + psiyvy
  p = - c2rho0 * div - xi_z * gradp0_z - xi_x * gradp0_x - xi_y * gradp0_y
  rho = - rho0 * div - xi_z * gradrho0_z - xi_x * gradrho0_x - xi_y * gradrho0_y
 
- call ddxyz(p, gradp_x, p, gradp_y, p, gradp_z, bh_prerho,bh_prerho,bv_prerho)
+ call ddx(p, gradp_x,bh_prerho)
+ call ddy(p, gradp_y,bh_prerho)
+ call ddz(p, gradp_z,bv_prerho)
 
   if (USE_PML) then
     if (IAM_ZBOT) then
@@ -743,9 +777,14 @@ gradp_y(:,dim2(rank)-nypmltop+1:dim2(rank),:)/kappay + psiyp
     endif
 
   endif
+ 
+ call ddx(flux3, dxflux3, bh_mag)
+ call ddy(flux3, dyflux3, bh_mag)
+ call ddz(flux2, dzflux2, bv_mag)
 
- call ddxyz(flux3, dxflux3, flux3, dyflux3, flux2, dzflux2,bh_mag,bh_mag,bv_mag )
- call ddxyz(flux2, dxflux2, flux1, dyflux1, flux1, dzflux1, bh_mag,bh_mag,bv_mag)
+ call ddx(flux2, dxflux2, bh_mag)
+ call ddy(flux1, dyflux1, bh_mag)
+ call ddz(flux1, dzflux1, bv_mag)
 
 
     if (USE_PML) then
@@ -803,8 +842,13 @@ bzpml*psizinductionby
  by = - dxflux3 + dzflux1
  bz =   dxflux2 - dyflux1
 
- call ddxyz(by, dxby, bz, dybz,  bx, dzbx, bh_mag,bh_mag,bv_mag)
- call ddxyz(bz, dxbz, bx, dybx, by, dzby, bh_mag,bh_mag,bv_mag)
+ call ddx(by, dxby, bh_mag)
+ call ddy(bz, dybz, bh_mag)
+ call ddz(bx, dzbx, bv_mag)
+ 
+ call ddx(bz, dxbz, bh_mag)
+ call ddy(bx, dybx, bh_mag)
+ call ddz(by, dzby, bv_mag)
 
  ! NOTE THAT FLUX1 IS OVERWRITTEN IN THE FINAL CALL
 
@@ -877,15 +921,21 @@ if (FLOWS) then
   allocate(temp_x(dim1(rank),dim2(rank),dim3(rank)),temp_y(dim1(rank),dim2(rank),dim3(rank)),&
    temp_z(dim1(rank),dim2(rank),dim3(rank)))
 
-   call ddxyz(v_x, temp_x, v_x, temp_y, v_x, temp_z, bh_disp,bh_disp,bv_disp)
+   call ddx(v_x, temp_x, bh_disp)
+   call ddy(v_x, temp_y, bh_disp)
+   call ddz(v_x, temp_z, bv_disp)
 
    RHSv_x = RHSv_x- 2.0_dp * (v0_x * temp_x + v0_y * temp_y + v0_z * temp_z)
 
-   call ddxyz(v_y, temp_x, v_y, temp_y, v_y, temp_z, bh_disp,bh_disp,bv_disp)
+   call ddx(v_y, temp_x, bh_disp)
+   call ddy(v_y, temp_y, bh_disp)
+   call ddz(v_y, temp_z, bv_disp)
 
    RHSv_y = RHSv_y- 2.0_dp * (v0_x * temp_x + v0_y * temp_y + v0_z * temp_z)
 
-   call ddxyz(v_z, temp_x, v_z, temp_y, v_z, temp_z, bh_disp,bh_disp,bv_disp)
+   call ddx(v_z, temp_x, bh_disp)
+   call ddy(v_z, temp_y, bh_disp)
+   call ddz(v_z, temp_z, bv_disp)
 
    RHSv_z = RHSv_z- 2.0_dp * (v0_x * temp_x + v0_y * temp_y + v0_z * temp_z)
 
