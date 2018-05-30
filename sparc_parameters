@@ -1,0 +1,248 @@
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+!! Parameters File for SPARC, does not require recompilation when changed.
+!! All values are CGS unless otherwise noted.
+
+!! for logicals 0 = false, 1 = true, unless otherwise noted
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! BASIC SIMULATION PARAMETERS
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! Gridpoints, Nx,Ny,Nz
+
+nx = 128
+ny = 128
+nz = 220 
+
+!! Length in X,Y dimensions, Z-dimension will be read in from zaxis.fits
+
+xlength = 200.0d8
+ylength = 200.0d8
+
+!! Simulation timestep
+
+timestep = 0.75
+
+!! Reinitialise similation?
+
+restart = 0
+
+!! If Reinitialise, starting snapshot, time0=1234 will try to load
+!! 'simname_1234.h5'
+time0 = 0
+
+!! Simulation max walltime (in hours "real time")
+
+wall_time = 1.0d8
+
+!! Solar Time Being Simulated (in hours "Physical Time")
+
+solartime = 4.0d0
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! CONFIG STUFF
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! Include BKG stabilisation as in schunker CSM models. y/n
+
+STABILISE = 1
+
+!! Include DAMPING in atmosphere
+
+DAMPING = 0
+
+!! DRIVER (1 = PULSE, 0 = RANDOM SOURCES, 2 = Random-ishly distributed pulses)
+
+PULSE = 1
+
+!! Are magnetic fields included? 0 = quiet sun (Uniform rho/pre/cs) 1 = thermal (non-uniform rho/pre/cs)
+!! 2 = full magnetic run
+
+MAGNETIC = 2
+
+!! Maximum Alfven Speed from VA limiter (in m/s)
+
+maxva = 5000.0d5
+
+!! 2D mode?
+TWOD = 0 
+!! If 2D mode, and magnetic, use 2.5D mode?
+
+TWOP5D = 0
+
+!! EQUATION MODE: 0 = velocity, 1 = displacement
+!! NB: If flows used magnetic fields have not yet been coded in.
+
+MODE = 0
+
+!! Flows: on/off
+FLOWS = 0 
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! MPI STUFF
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! The number of cores used in the decomposition. NB block_x*block_y*block_z should equal num_cores
+
+block_x = 2
+block_y = 2
+block_z = 4
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! BOUNDARY CONDITION STUFF
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! Use Top/Bottom PMLs?
+
+USE_PML = 1 
+
+!! Side PMLs?
+
+USE_HPML = 0
+
+!! Periodic Side Boundaries??
+
+PERIODIC = 1
+
+!! PML variables
+
+!! For each pml supply: num_points, RC_value, n_value, kappa_value, sp_value
+xpmlb = 10,15.0,3.0,8.0,0.1
+xpmlt = 10,15.0,3.0,8.0,0.1
+ypmlb = 10,15.0,3.0,8.0,0.1
+ypmlt = 10,15.0,3.0,8.0,0.1
+zpmlb = 10,5.0,2.0,8.0,0.1
+zpmlt = 10,5.0,2.0,8.0,0.1
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! PULSE DRIVER STUFF
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! pulse parameters, pulse taken from shelyag et al. 2009, Acoustic wave propagation in the solar sub-photosphere
+!! Time variables, in seconds
+
+pulse_t0 = 600.0
+pulse_t1 = 300.0
+pulse_st = 75.0
+
+!! The horizontal placement of the source in Mm
+
+pulse_pz = -0.4d8
+
+pulse_px = 35.0d8
+pulse_py = 35.0d8
+pulse_sr = 2.0d8
+pulse_sz = 0.15d8
+
+pulse_amp = 1.0d4
+
+!! pulse direction, 1  = v_x, 2 = v_y, 3 = v_z
+
+pulse_dir = 3 
+
+!! Horizontal sponge parameters (are set to 0 if periodic)
+!! Used if PMLS are off
+!! The strength (dimensionless), length (Mm)
+!! decay, or steepness of exponential between on/off (dimensionless)
+
+sp_str = 0d0
+sp_length = 10.0d8
+sp_decay = 0.008
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Filtering Stuff
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! Which filters to use, in xy and z directions, set to:
+!! 1 = 11pt aliasing filter as in Hanasoges SPARC
+!! 2 = 7pt digital filter as in Parchevsky + Kosovichev
+
+filter_mode_xy = 1
+filter_mode_z = 1
+
+!! Four Parameters for the Filtering routines, s_xy - strength of the xy filter, s_z, similar for vertical
+!! NB s_xy and s_z are only used if filter_mode=1
+
+s_z = 1.0d0
+s_xy = 1.0d0
+
+!! How regularly to Filter (t_z), how many filter iterations to do a horizontal filter
+!! if either are less than timestep, they will be set to the timestep.
+
+t_z = 7.50d0
+t_xy = 15.0d0
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! DIRECTORY STUFF
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! Directory for INPUT files (rho, pre, Cs, Bx, By, Bz (3D), zaxis and grav (1D) hdf5 file)
+
+dir_bkg = "./TEST_CASE/test_for_matthias_30_Bmod_10.h5"
+
+!! Directory for OUTPUT files (rho,pre,vx,vy,vz,bx,by,bz pertubation fits files)
+
+dir_out = "./TEST_CASE/"
+
+!! NAME of output files, will be simname +  _ ((d(isplacement) or v(elocity)) + (m(agnetic), t(hermal) or q(uiet))
+!! + f(lows) (if flows) + _0001.h5
+!! eg. sparc_test_vm_0001.h5
+
+simname = "pml_test_N10_RC5_kappa8"
+
+!! Location of forcing Function
+
+forcingfunc = "/short/y94/dfp565/forcing256_200_18hrs.fits"
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! RANDOM DRIVER STUFF
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! Cadence of the forcing function
+
+cadforcing = 60.0d0
+
+!! Random Sources gaussian in Z stdev, default for sparc was 77km.
+
+randomexcitesigma = 0.075d8
+
+!! Random Sources gaussian in Z stdev, default for sparc was 77km.
+
+randomexcitedepth = -0.15d8
+
+!! Random Sources Driver amplitude
+
+randomexciteampl = 1.0d4
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+!! OUTPUT STUFF
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+!! Cadence of Slice Output
+
+fulloutputcad = 600.0d0
+
+!! The first time in hours (other than 0) that will be saved. So you can give 
+!! 3 hours of mixing time without ending up with all the data
+
+minsavtime = 0.0d0
+
+!! Number of zeros in the output filename
+
+timestamp_size = 4 
+
+!! Chunk Output Stuff
+
+chunkoutputcad = 30.0d0
+
+Bottom and top indices of the chunk to be saved:
+xcb = 1
+xct = 256
+ycb = 1
+yct = 256
+zcb = 269
+zct = 269
+
+!!~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+

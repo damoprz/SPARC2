@@ -20,7 +20,7 @@ HDF5_LD = mpif90
 FC = h5pfc
 LD = h5pfc
  
-FFLAGS = -O2 -ffree-line-length-none ## -fbounds-check  -fbacktrace -Wall -W
+FFLAGS = -warn all -O2 ## -ffree-line-length-none  -fbounds-check  -fbacktrace -Wall -W
 LDFLAGS = 
 
 INCLUDE= fftw3.f
